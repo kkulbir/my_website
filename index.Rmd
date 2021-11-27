@@ -1,0 +1,20 @@
+---
+title: "Kulbir Kaur"
+image: "kaur.jpeg"
+color1: "#B6DCEB"
+color2: "#F594C5"
+angle: 130
+links:
+  - label: LinkedIn
+    url: "https://www.linkedin.com/in/kaurkulbir/"
+  - label: GitHub
+    url: "https://github.com/kkulbir"
+  - label: Twitter
+    url: "https://twitter.com/shldbcrzy"
+  - label: Email
+    url: "mailto:kulbirkaur@gmail.com"
+site: distill::distill_website
+output:
+  postcards::onofre
+---
+ A neuroscientist and physical therapist by training, I started to learn R during the pandemic. R has given me the opportunity to analyze and visualize data outside of my scientific endeavors. This site is my attempt to document my progress of bringing data to life through visualizations.
