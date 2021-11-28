@@ -1,0 +1,115 @@
+---
+title: "Portfolio"
+description: |
+  Kulbir's journey to learning and mastering R !!
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(ggbump)
+library(lubridate)
+library(ggforce)
+```
+
+# Which cities have the best parks
+
+```{r echo=FALSE, warning=FALSE, results="hide"}
+parks <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-06-22/parks.csv')
+
+glimpse(parks)
+
+# EDA trying to remove the % sign from the park_pct_city_data using parse_number used Kiesei stream 
+
+parks_df <- parks %>% 
+  mutate(park_pct_city_data = parse_number(park_pct_city_data),
+         pct_near_park_data = parse_number(pct_near_park_data),
+         spend_per_resident_data = parse_number(spend_per_resident_data)) %>% 
+  mutate(across(where(is.character), factor)) %>% 
+  select(-city_dup)
+
+parks_df
+
+unique(parks_df$city)
+
+# Recoding for the 2 different Washington DC spellings 
+parks_recode <- parks_df %>%  
+  mutate(city = recode(city, 
+                       "Washington, D.C." = "Washington, DC"))
+
+top_parks <- c("Minneapolis", "Washington, DC", "St. Paul", "Arlington, Virginia", "Cincinnati", "Portland", "Irvine", "San Francisco", "Boston", "Chicago")
+
+top <- parks_recode %>% 
+  filter(city %in% top_parks)
+ 
+plot <- top %>%  
+  ggplot(aes(year, rank, color = city)) +
+  geom_point(size = 2) +
+  geom_bump() +
+  theme(plot.background = element_blank())+
+  scale_y_reverse() +
+  theme(panel.background = element_rect(fill = "black", color = "green"),
+        panel.grid = element_blank()) +
+  scale_x_continuous( limits = c(2012, 2022),
+                      breaks = seq( 2012, 2020, 
+                                    by = 2)) +
+  theme(legend.position = "none",
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+  geom_text(data = top %>%
+              filter(year == max(year)),
+            aes(x = year + 0.2, label = city),
+            size = 3, hjust = 0) +
+  labs(title ="Top 10 park cities of 2020 & their ranks through the years",
+       caption = "Source: TidyTuesday |inspired by: @kierisi")
+
+plot
+```
+
+# Happy Birthday to the Lemurs 
+
+```{r echo=FALSE, warning=FALSE, results="hide"}
+lemurs <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-08-24/lemur_data.csv')
+
+unique(lemurs$birth_institution)
+
+lemurs %>% filter(birth_institution == "NMADAGASCAR" | birth_institution == "Madagascar / North /" | birth_institution == "Madagascar /" ) %>% unique() %>% group_by(dob, birth_institution) %>% count() %>% view()
+
+my_birthyear <- lemurs %>% 
+  group_by(dlc_id) %>% 
+  mutate(dob = min(ymd(dob))) %>% 
+  mutate(year_joined = year(dob)) %>% 
+  mutate(birth_institution = recode (birth_institution, "Madagascar / North /" = "Madagascar")) %>% 
+  mutate(birth_institution = recode(birth_institution, "Madagascar /" = "Madagascar")) %>% 
+  mutate(birth_institution = recode(birth_institution, "NMADAGASCAR" = "Madagascar")) %>% 
+  filter(birth_institution == "Madagascar" | birth_institution == "Duke Lemur Center") %>% 
+  mutate() %>% 
+  mutate(Month = lubridate::month(birth_month, label = TRUE, abbr = FALSE)) %>%
+  summarise(name, taxon, year_joined, birth_institution, Month) %>% 
+  unique() %>% 
+  group_by(year_joined, birth_institution) %>% 
+  mutate( n = length(year_joined)) %>% 
+  unique()
+
+my_birthyear$birth_institution <- factor(my_birthyear$birth_institution, levels = c("Duke Lemur Center", "Madagascar"))
+
+lemur_birthday <-ggplot(my_birthyear, aes(x = year_joined, fill = birth_institution), color = white) + geom_area(stat = "bin") + scale_fill_brewer(palette = "Greens") +
+  theme_classic() +
+  theme(axis.line = element_line(color = 'white', size = 0.05))+
+  theme(legend.position = "bottom", legend.title = element_blank(), legend.background = element_rect(fill = "#A78B74" )) +
+  labs(title = "What happened to Lemurs in Madagascar?", x = "Birth Year", y = "count", subtitle = "No data available for Madagascar after 1990", caption = "Data:#tidytuesday | twitter:@shldbcrzy | inspired by:@alyssastweeting") +
+  theme(plot.title = element_text(size = 14)) +
+  theme(axis.title = element_text(size = 6, face = "bold")) +
+  theme(axis.line = element_line(color = "#A78B74", size = 0.05)) +
+  theme(axis.ticks.y = element_blank(), axis.ticks.x = element_blank()) +
+  theme(panel.background = element_rect(fill = "#A78B74")) +
+  theme(plot.background = element_rect(fill = "#A78B74")) +
+  facet_zoom(x = birth_institution == "Madagascar", ylim = c(0, 20), horizontal = FALSE, show.area = FALSE)
+
+lemur_birthday
+```
+
+# Best city for female PhD's 
+
+
+
