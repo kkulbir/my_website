@@ -2,6 +2,7 @@
 title: "Portfolio"
 description: |
   Kulbir's journey to learning and mastering R !!
+  Find the code for the visualizations on my social media pages & github 
 ---
 
 ```{r setup, include=FALSE}
@@ -10,6 +11,14 @@ library(tidyverse)
 library(ggbump)
 library(lubridate)
 library(ggforce)
+library(flexdashboard)
+library(medicaldata)
+library(tidyverse)
+library(reactable)
+library(crosstalk)
+library(plotly)
+library(htmltools)
+library(skimr)
 ```
 
 # Which cities have the best parks
@@ -110,6 +119,65 @@ lemur_birthday
 ```
 
 # Best city for female PhD's 
+
+```{r echo=FALSE, warning=FALSE, results="hide"}
+# Circular plot
+#ask a manager data 
+tuesdata <- tidytuesdayR::tt_load(2021, week = 21)
+survey <- tuesdata$survey
+
+phd_survey <- survey %>% 
+  filter(highest_level_of_education_completed %in% "PhD") %>% 
+  filter(currency == "USD" & country %in% c("United States", "USA", "US", "U.S.", "United States of America", "Usa", "United states", "united states", "Us")) %>% 
+  mutate(gender = fct_collapse(gender,"Other/prefer not to answer" = c("Other or prefer not to answer", "Prefer not to answer", "Non-binary")), gender = fct_relevel(gender, "Woman")) %>% mutate(state = recode(state, "California, Oregon" = "California")) %>% 
+  mutate(state = recode(state, "Montana, Wyoming" = "Montana")) %>% 
+  mutate(state = recode(state, "Indiana, Ohio" = "Indiana"))
+
+plot_1 <- phd_survey %>% 
+  drop_na(gender, state) %>% 
+  filter(gender == "Woman") %>% 
+  group_by(state) %>%
+  summarise(avg_salary = mean(annual_salary)) %>% 
+  arrange(avg_salary) %>% 
+  mutate(id = row_number())
+
+# https://bjnnowak.netlify.app/2021/08/31/r-polar-barplots/ 
+# https://www.r-graph-gallery.com/296-add-labels-to-circular-barplot.html
+(fig <- plot_1 %>% 
+    ggplot(aes(x = id, y = avg_salary)) +
+    geom_bar(stat = "identity", fill = "#FF3368")  +
+    ylim(0,150000)+
+    theme_minimal() +
+    theme(panel.background = element_rect(fill = "pink", color = "pink"),
+          axis.text = element_blank(),
+          axis.title = element_blank(),
+          panel.grid = element_blank(),
+          plot.background = element_rect(fill = "pink", color = "pink"),
+          plot.margin = margin(t=0.5, r=0.5, b=0.5,l=0.5, unit = "cm")) +
+    coord_polar(start = 0))
+
+plot_labeled <- plot_1 %>% 
+  mutate(angle = 90-306*(id-0.5)/max(id))
+
+fig + geom_text(
+  data = plot_labeled, 
+  aes(x = id, y = avg_salary, label = state, angle = angle), 
+  hjust = 0
+)
+
+plot_labeled <- plot_labeled %>% 
+  mutate(hjust = case_when(angle <=-90~1, TRUE~0)) %>% 
+  mutate(angle = case_when(angle<=-90~angle+180,TRUE~angle))
+  
+fig <- fig + geom_text(
+  data = plot_labeled, 
+  aes(x = id, y = avg_salary +10 , label = state, angle = angle, hjust = hjust), size = 1.5, color = "purple"
+) +
+  labs(title = "Where should I move next?", caption = "Source: #tidytuesday |inspired by: @BjnNowak")
+
+fig
+
+```
 
 
 
