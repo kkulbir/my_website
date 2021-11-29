@@ -1,5 +1,5 @@
 ---
-title: "Portfolio"
+title: "portfolio"
 description: |
   Kulbir's journey to learning and mastering R !!
   Find the code for the visualizations on my social media pages & github 
