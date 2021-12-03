@@ -17,4 +17,4 @@ site: distill::distill_website
 output:
   postcards::onofre
 ---
- A neuroscientist and physical therapist by training, I started to learn R during the pandemic. R has given me the opportunity to analyze and visualize data outside of my scientific endeavors. This site is my attempt to document my progress of bringing data to life through visualizations.
+ A neuroscientist and physical therapist by training, I started to learn R during the pandemic. R has given me the opportunity to analyze and visualize data outside of my scientific endeavors. This site is my attempt to document my progress of bringing data to life through visualizations.This website is made using R and the distill package. 
